@@ -23,6 +23,21 @@ if !exists("g:autocscope_menus")
   let g:autocscope_menus = 1
 endif
 
+" If you set this to 1, then the quickfix window will be used to store and
+" show cscope results.  Default is 0 (disabled).
+" Note: the quickfix list cannot be used simultaneously on multiple tab pages.
+if !exists("g:autocscope_use_quickfix")
+  let g:autocscope_use_quickfix = 0
+endif
+
+" If you set this to 1, then the location window will be used instead of the
+" quickfix window to store and show cscope results.
+" Default is 0 (disabled).
+" Note: FIXME: the location list is still very buggy on multiple tab pages.
+if !exists("g:autocscope_use_location_instead")
+  let g:autocscope_use_location_instead = 0
+endif
+
 "==
 " windowdir
 "  Gets the directory for the file in the current window
@@ -78,14 +93,39 @@ function s:Cycle_macros_menus()
     let s:menus_loaded = 1
     set csto=0
     set cst
-    silent! map <unique> <C-\>s :cs find s <C-R>=expand("<cword>")<CR><CR>
-    silent! map <unique> <C-\>g :cs find g <C-R>=expand("<cword>")<CR><CR>
-    silent! map <unique> <C-\>d :cs find d <C-R>=expand("<cword>")<CR><CR>
-    silent! map <unique> <C-\>c :cs find c <C-R>=expand("<cword>")<CR><CR>
-    silent! map <unique> <C-\>t :cs find t <C-R>=expand("<cword>")<CR><CR>
-    silent! map <unique> <C-\>e :cs find e <C-R>=expand("<cword>")<CR><CR>
-    silent! map <unique> <C-\>f :cs find f <C-R>=expand("<cword>")<CR><CR>
-    silent! map <unique> <C-\>i :cs find i <C-R>=expand("<cword>")<CR><CR>
+    if has('quickfix') && g:autocscope_use_quickfix == 1
+      set cscopequickfix=s-,c-,d-,i-,t-,e-
+      if g:autocscope_use_location_instead == 1
+        " ':lw' will not open location window when list is empty, better than ':lopen'
+        silent! map <unique> <C-\>s :lcs find s <C-R>=expand("<cword>")<CR><CR>:lw<CR>
+        silent! map <unique> <C-\>g :lcs find g <C-R>=expand("<cword>")<CR><CR>:lw<CR>
+        silent! map <unique> <C-\>d :lcs find d <C-R>=expand("<cword>")<CR><CR>:lw<CR>
+        silent! map <unique> <C-\>c :lcs find c <C-R>=expand("<cword>")<CR><CR>:lw<CR>
+        silent! map <unique> <C-\>t :lcs find t <C-R>=expand("<cword>")<CR><CR>:lw<CR>
+        silent! map <unique> <C-\>e :lcs find e <C-R>=expand("<cword>")<CR><CR>:lw<CR>
+        silent! map <unique> <C-\>f :lcs find f <C-R>=expand("<cword>")<CR><CR>:lw<CR>
+        silent! map <unique> <C-\>i :lcs find i <C-R>=expand("<cword>")<CR><CR>:lw<CR>
+      else
+        " ':cw' will not open quickfix window when list is empty, better than ':copen'
+        silent! map <unique> <C-\>s :cs find s <C-R>=expand("<cword>")<CR><CR>:cw<CR>
+        silent! map <unique> <C-\>g :cs find g <C-R>=expand("<cword>")<CR><CR>:cw<CR>
+        silent! map <unique> <C-\>d :cs find d <C-R>=expand("<cword>")<CR><CR>:cw<CR>
+        silent! map <unique> <C-\>c :cs find c <C-R>=expand("<cword>")<CR><CR>:cw<CR>
+        silent! map <unique> <C-\>t :cs find t <C-R>=expand("<cword>")<CR><CR>:cw<CR>
+        silent! map <unique> <C-\>e :cs find e <C-R>=expand("<cword>")<CR><CR>:cw<CR>
+        silent! map <unique> <C-\>f :cs find f <C-R>=expand("<cword>")<CR><CR>:cw<CR>
+        silent! map <unique> <C-\>i :cs find i <C-R>=expand("<cword>")<CR><CR>:cw<CR>
+      endif
+    else
+      silent! map <unique> <C-\>s :cs find s <C-R>=expand("<cword>")<CR><CR>
+      silent! map <unique> <C-\>g :cs find g <C-R>=expand("<cword>")<CR><CR>
+      silent! map <unique> <C-\>d :cs find d <C-R>=expand("<cword>")<CR><CR>
+      silent! map <unique> <C-\>c :cs find c <C-R>=expand("<cword>")<CR><CR>
+      silent! map <unique> <C-\>t :cs find t <C-R>=expand("<cword>")<CR><CR>
+      silent! map <unique> <C-\>e :cs find e <C-R>=expand("<cword>")<CR><CR>
+      silent! map <unique> <C-\>f :cs find f <C-R>=expand("<cword>")<CR><CR>
+      silent! map <unique> <C-\>i :cs find i <C-R>=expand("<cword>")<CR><CR>
+    endif
     if has("menu")
       nmenu &Cscope.Find.Symbol<Tab><c-\\>s
         \ :cs find s <C-R>=expand("<cword>")<CR><CR>
